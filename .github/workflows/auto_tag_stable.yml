@@ -15,20 +15,24 @@ jobs:
         contents: write
     steps:
       - name: Check Branch Match
+        id: check_branch
         env:
           STABLE_BRANCH: ${{ vars.STABLE_BRANCH }} # Repository variable
         run: |
           echo "Push detected on branch $GITHUB_REF"
           if [[ "${GITHUB_REF#refs/heads/}" != "${STABLE_BRANCH}" ]]; then
-            echo "This workflow only runs for branch $STABLE_BRANCH. Exiting."
-            exit 0
+            echo "This workflow only runs for branch $STABLE_BRANCH. Skipping further steps."
+            echo "::set-output name=run::false"
+          else
+            echo "::set-output name=run::true" 
           fi
-          echo "Running workflow for branch $STABLE_BRANCH"
 
       - name: Checkout code
+        if: steps.check_branch.outputs.run == 'true'
         uses: actions/checkout@v4
 
       - name: Tag
+        if: steps.check_branch.outputs.run == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
