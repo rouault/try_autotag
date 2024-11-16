@@ -22,9 +22,9 @@ jobs:
           echo "Push detected on branch $GITHUB_REF"
           if [[ "${GITHUB_REF#refs/heads/}" != "${STABLE_BRANCH}" ]]; then
             echo "This workflow only runs for branch $STABLE_BRANCH. Skipping further steps."
-            echo "::set-output name=run::false"
+            echo "run=false" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run::true" 
+            echo "run=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Checkout code
