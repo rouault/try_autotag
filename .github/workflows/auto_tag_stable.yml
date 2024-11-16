@@ -1,0 +1,36 @@
+name: Update Stable Tag
+
+on:
+  push:
+    branches:
+      - '**' # Match all branches
+
+permissions:
+    contents: read
+
+jobs:
+  update-stable-tag:
+    runs-on: ubuntu-latest
+    permissions:
+        contents: write
+    steps:
+      - name: Check Branch Match
+        env:
+          STABLE_BRANCH: ${{ vars.STABLE_BRANCH }} # Repository variable
+        run: |
+          echo "Push detected on branch $GITHUB_REF"
+          if [[ "${GITHUB_REF#refs/heads/}" != "${STABLE_BRANCH}" ]]; then
+            echo "This workflow only runs for branch $STABLE_BRANCH. Exiting."
+            exit 0
+          fi
+          echo "Running workflow for branch $STABLE_BRANCH"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git tag -f stable
+          git push -f origin stable
